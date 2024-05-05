@@ -1,0 +1,11 @@
+<div [class]="mode + '-mode'">
+    <ng-content
+      *ngIf="mode === 'display'"
+      select=".display-mode">
+    </ng-content>
+    <ng-content
+      *ngIf="mode === 'edit'"
+      select=".edit-mode">
+    </ng-content>
+  </div>
+  

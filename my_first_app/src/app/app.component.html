@@ -1,0 +1,20 @@
+<app-alert>Hello</app-alert>
+<app-alert alertType="primary">Hello</app-alert>
+<app-alert alertType="secondary">Hello</app-alert>
+<app-alert alertType="warn">Hello</app-alert>
+
+<app-field mode="display">
+  <ng-container class="display-mode">
+    <div>Title: {{ title }}</div>
+  </ng-container>
+  <ng-container class="edit-mode">
+    <label>Title: </label>
+    <input [value]="title" />
+  </ng-container>
+</app-field>
+
+<button (click)="pVal = pVal + 1">
+  Step
+</button>
+<app-my-component [myValue]="pVal">
+</app-my-component>

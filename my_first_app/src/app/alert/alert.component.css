@@ -1,0 +1,22 @@
+div {
+    border: 1px solid;
+    border-radius: 5px;
+    padding: 10px;
+    display: flex;
+  }
+.primary {
+  background-color: #cce5ff;
+  color: #004085;
+  border: none;
+}
+.secondary {
+  background-color: #e2e3e5;
+  color: #383d41;
+  border: none;
+}
+.warn {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: none;
+}
+  
