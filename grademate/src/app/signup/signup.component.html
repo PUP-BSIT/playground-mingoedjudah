@@ -3,9 +3,9 @@
         <label for="first_name">First Name</label>
         <input id="first_name" formControlName="first_name">
         <div *ngIf="signupForm.get('first_name').invalid && (signupForm.get('first_name').dirty || signupForm.get('first_name').touched)">
-          <div *ngIf="signupForm.get('first_name').errors?.required">First Name is required.</div>
-          <div *ngIf="signupForm.get('first_name').errors?.invalidCharacters">First Name cannot include numbers or symbols.</div>
-          <div *ngIf="signupForm.get('first_name').errors?.invalidPunctuation">First Name cannot include invalid punctuation marks.</div>
+          <div *ngIf="signupForm.get('first_name').errors?.required">First Name is required</div>
+          <div *ngIf="signupForm.get('first_name').errors?.invalidCharacters">First Name cannot include numbers or symbols</div>
+          <div *ngIf="signupForm.get('first_name').errors?.invalidPunctuation">First Name cannot include invalid punctuation marks</div>
         </div>
       </div>
   
@@ -13,9 +13,9 @@
         <label for="middle_name">Middle Name</label>
         <input id="middle_name" formControlName="middle_name">
         <div *ngIf="signupForm.get('middle_name').invalid && (signupForm.get('middle_name').dirty || signupForm.get('middle_name').touched)">
-          <div *ngIf="signupForm.get('middle_name').errors?.required">Middle Name is required.</div>
-          <div *ngIf="signupForm.get('middle_name').errors?.invalidCharacters">Middle Name cannot include numbers or symbols.</div>
-          <div *ngIf="signupForm.get('middle_name').errors?.invalidPunctuation">Middle Name cannot include invalid punctuation marks.</div>
+          <div *ngIf="signupForm.get('middle_name').errors?.required">Middle Name is required</div>
+          <div *ngIf="signupForm.get('middle_name').errors?.invalidCharacters">Middle Name cannot include numbers or symbols</div>
+          <div *ngIf="signupForm.get('middle_name').errors?.invalidPunctuation">Middle Name cannot include invalid punctuation marks</div>
         </div>
       </div>
   
@@ -23,9 +23,9 @@
         <label for="surname">Surname</label>
         <input id="surname" formControlName="surname">
         <div *ngIf="signupForm.get('surname').invalid && (signupForm.get('surname').dirty || signupForm.get('surname').touched)">
-          <div *ngIf="signupForm.get('surname').errors?.required">Surname is required.</div>
-          <div *ngIf="signupForm.get('surname').errors?.invalidCharacters">Surname cannot include numbers or symbols.</div>
-          <div *ngIf="signupForm.get('surname').errors?.invalidPunctuation">Surname cannot include invalid punctuation marks.</div>
+          <div *ngIf="signupForm.get('surname').errors?.required">Surname is required</div>
+          <div *ngIf="signupForm.get('surname').errors?.invalidCharacters">Surname cannot include numbers or symbols</div>
+          <div *ngIf="signupForm.get('surname').errors?.invalidPunctuation">Surname cannot include invalid punctuation marks</div>
         </div>
       </div>
   
@@ -33,9 +33,9 @@
         <label for="email">Email</label>
         <input id="email" type="email" formControlName="email" />
         <div *ngIf="signupForm.get('email').invalid && signupForm.get('email').touched">
-          <div *ngIf="signupForm.get('email').errors?.required">Email is required.</div>
-          <div *ngIf="signupForm.get('email').errors?.email">Valid email is required.</div>
-          <div *ngIf="signupForm.get('email').errors?.emailExists">Email already exists.</div>
+          <div *ngIf="signupForm.get('email').errors?.required">Email is required</div>
+          <div *ngIf="signupForm.get('email').errors?.email">Valid email is required</div>
+          <div *ngIf="signupForm.get('email').errors?.emailExists">Email already exists</div>
         </div>
       </div>
   
@@ -43,7 +43,7 @@
       <label for="birthdate">Birthdate</label>
       <input id="birthdate" type="date" formControlName="birthdate" />
       <div *ngIf="signupForm.get('birthdate').invalid && signupForm.get('birthdate').touched">
-        Birthdate is required.
+        Birthdate is required
       </div>
     </div>
   
@@ -55,7 +55,7 @@
         <option value="female">Female</option>
         </select>
         <div *ngIf="signupForm.get('gender').invalid && (signupForm.get('gender').dirty || signupForm.get('gender').touched)">
-            <div *ngIf="signupForm.get('gender').errors?.required">Gender is required.</div>
+            <div *ngIf="signupForm.get('gender').errors?.required">Gender is required</div>
         </div>
     </div>
   
@@ -63,9 +63,9 @@
         <label for="university">University</label>
         <input id="university" type="text" formControlName="university" />
         <div *ngIf="signupForm.get('university').invalid && signupForm.get('university').touched">
-          <div *ngIf="signupForm.get('university').errors?.required">University is required.</div>
+          <div *ngIf="signupForm.get('university').errors?.required">University is required</div>
           <div *ngIf="signupForm.get('university').errors?.pattern">
-            University cannot include numbers or symbols, only characters and spaces.
+            University cannot include numbers or symbols, only characters and spaces
           </div>
         </div>
       </div>
@@ -76,7 +76,7 @@
           <option *ngFor="let level of academicLevels" [value]="level.name">{{ level.name }}</option>
         </select>
         <div *ngIf="signupForm.get('academic_level').invalid && signupForm.get('academic_level').touched">
-          Academic Level is required.
+          Academic Level is required
         </div>
       </div>
   
@@ -84,14 +84,14 @@
     <label for="username">Username</label>
     <input id="username" type="text" formControlName="username" />
     <div *ngIf="signupForm.get('username').invalid && signupForm.get('username').touched">
-      <div *ngIf="signupForm.get('username').errors?.required">Username is required.</div>
+      <div *ngIf="signupForm.get('username').errors?.required">Username is required</div>
       <div *ngIf="signupForm.get('username').errors?.minlength || signupForm.get('username').errors?.maxlength">
-        Username must be between 8 and 16 characters.
+        Username cannot be less than 8 characters
       </div>
       <div *ngIf="signupForm.get('username').errors?.pattern">
-        Username must include at least one lowercase letter, one uppercase letter, one number, and one special character.
+        Username must be unique
       </div>
-      <div *ngIf="signupForm.get('username').errors?.usernameExists">Username already exists.</div>
+      <div *ngIf="signupForm.get('username').errors?.usernameExists">Username already exists</div>
     </div>
   </div>
 
@@ -101,7 +101,7 @@
     <div *ngIf="signupForm.get('password').invalid && signupForm.get('password').touched">
       <div *ngIf="signupForm.get('password').errors?.required">Password is required.</div>
       <div *ngIf="signupForm.get('password').errors?.invalidPassword">
-        Password must be 8-16 characters with at least one lowercase letter, one uppercase letter, one number, and one special character.
+        Password must be unique and cannot be less than 8 characters
       </div>
     </div>
   </div>
@@ -110,7 +110,7 @@
     <label for="confirm_password">Confirm Password</label>
     <input id="confirm_password" type="password" formControlName="confirm_password" />
     <div *ngIf="signupForm.hasError('passwordMismatch') && signupForm.get('confirm_password').touched">
-      Passwords do not match.
+      Passwords do not match
     </div>
   </div>
 
