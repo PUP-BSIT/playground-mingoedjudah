@@ -1,0 +1,115 @@
+<div class="header">
+  <div class="logo">
+    <img src="assets/logo_text.png" alt="GRADEMATE Logo">
+  </div>  
+  <div class="university-name">{{ profile.school }}</div>
+  <div class="user-info">
+    <span>{{ profile.username }}</span>
+    <img [src]="" alt="Profile Image" id="header-profile-pic">
+  </div>
+</div>
+<div class="container">
+  <div class="sidebar">
+    <div class="dashboard-title">DASHBOARD</div>
+    <div class="menu-item" (click)="selectMenu('home')" [ngClass]="{ 'active': selectedMenu === 'home' }">
+      <i class='bx bxs-home'></i> Home
+    </div>
+    <div class="menu-item" (click)="selectMenu('courses')" [ngClass]="{ 'active': selectedMenu === 'courses' }">
+      <i class='bx bxs-book-open'></i> Subjects
+    </div>
+    <div class="menu-item" (click)="selectMenu('assessment')" [ngClass]="{ 'active': selectedMenu === 'assessment' }">
+      <i class='bx bxs-book-alt'></i> Assessment
+    </div>
+    <div class="menu-item" (click)="selectMenu('input-grades')" [ngClass]="{ 'active': selectedMenu === 'input-grades' }">
+      <i class='bx bxs-edit'></i> Grade Entry
+    </div>
+    <div class="menu-item" (click)="selectMenu('account')" [ngClass]="{ 'active': selectedMenu === 'account' }">
+      <i class='bx bxs-user'></i> Account
+    </div>
+    <div class="bottom-items">
+      <div class="toggle-container">
+        <label for="toggle" class="toggle-label">
+          <i class='bx bxs-sun sun-icon'></i>
+          <i class='bx bxs-moon moon-icon'></i>
+        </label>
+        </div>
+        <div class="menu-items" (click)="logout()">
+          <i class='bx bxs-exit'></i> Logout
+        </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="selectedMenu === 'courses'">
+  <div class="table-container">
+    <table class="table">
+      <thead>
+        <tr>
+          <th colspan="2" class="subject-header">
+            Subject Names
+            <div class="action-buttons">
+              <button (click)="toggleSelection()">Select</button>
+              <button (click)="deleteSelected()">Delete</button>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Loop through subjects -->
+        <tr *ngFor="let subject of subjects; let i = index">
+          <td>
+            <input type="checkbox" [(ngModel)]="selectedSubjects[i]" class="select-checkbox" [hidden]="!selectMode">
+            <input type="text" [(ngModel)]="subject.subject_name" [disabled]="!selectMode" (blur)="updateSubject(subject)">
+            <button *ngIf="selectMode" (click)="removeSubject(i)">Remove</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="add-row-container">
+      <input type="text" placeholder="Enter subject name" #newSubjectName>
+      <button class="add-row-button" (click)="addSubject(newSubjectName.value); newSubjectName.value=''">Add Subject</button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="selectedMenu === 'account'">
+  <div class="account-info">
+    <div class="card">
+      <div class="left-container">
+        <div class="profile-image-container">
+          <img [src]="profile.profilePic" alt="Profile Image" 
+            id="profileImage">
+          <input type="file" id="uploadImage" style="display: none;" 
+            accept="image/*">
+          <button id="editImageButton">Edit Profile Image</button>
+        </div>
+        <h2 class="gradienttext">{{ profile.name }}</h2>
+        <p>{{ profile.username }}</p>
+      </div>
+      <div class="right-container">
+        <h2 class="gradienttext">ACCOUNT DETAILS</h2>
+        <h3>{{ profile.name }}</h3>
+        <p class="email">{{ profile.email }}</p>
+        <div class="school-container">
+          <span class="school">School</span>
+          <span class="course">{{ profile.school }}</span>
+        </div>
+        <div class="user-information">
+          <div class="other-info">
+            <span class="gender">{{ profile.gender }}</span>
+            <span class="label">gender</span>
+          </div>
+          <div class="other-info">
+            <span class="birthday">{{ profile.birthday | 
+              date:'longDate' }}</span>
+            <span class="label">birthday</span>
+          </div>
+          <div class="other-info">
+            <span class="age">{{ profile.age }}</span>
+            <span class="label">age</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
