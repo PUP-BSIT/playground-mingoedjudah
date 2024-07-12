@@ -5,7 +5,7 @@ import { catchError } from 'rxjs/operators';
 
 @Injectable()
 export class SignupService {
-  private signupUrl = 'http://localhost/php-project';
+  private signupUrl = 'http://localhost/api';
   //private signupUrl = 'https://grademate.tech/api';
 
   constructor(private http: HttpClient) {}

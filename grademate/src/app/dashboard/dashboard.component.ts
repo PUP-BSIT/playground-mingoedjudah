@@ -1,12 +1,32 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { SignupService } from '../services/signup.service';
 import { StudentService } from '../services/student.service';
 import { SubjectService } from '../services/subject.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { QuizService } from '../services/quiz.service';
 
 interface Subject {
   id: number;
   subject_name: string;
+  activity_weight: number;
+  quiz_weight: number;
+  exercise_weight: number;
+  exam_weight: number;
+  project_weight: number;
+}
+
+interface AssessmentWeights {
+  activity_weight: number;
+  quiz_weight: number;
+  exercise_weight: number;
+  exam_weight: number;
+  project_weight: number;
+}
+
+interface Assessment {
+  assessment_name: string;
+  score: number;
+  total: number;
 }
 
 @Component({
@@ -15,253 +35,321 @@ interface Subject {
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
+  selectedSubjects: boolean[] = [];
+  selectedCourses: boolean[] = [];
   selectedSubMenu: string | null = '';
-  selectedMenu = 'home';
+  selectedCourse = '';
+  courses: string[] = [];
+  selectedMenu = 'courses';
+  selectedSubjectId: number | null = null;
+  assessmentWeights: AssessmentWeights | null = null;
+  subjects: Subject[] = [];
+  selectedAssessmentType: string = 'activity'
+  assessmentData: Assessment[] = [];
+
+  subjectData = {
+    subject_name: '',
+    quiz_weight: 0,
+    activity_weight: 0,
+    exam_weight: 0,
+    project_weight: 0,
+    exercise_weight: 0
+  };
+
+  newSubjectName: string = '';
+  selectMode = false;
+  showAddModal = false;
+  showEditModal = false;
+  selectedSubject: Subject = { 
+    id: 0, 
+    subject_name: '', 
+    quiz_weight: 0, 
+    activity_weight: 0, 
+    exam_weight: 0, 
+    project_weight: 0, 
+    exercise_weight: 0 
+  };
+
+  newCourseName: string = '';
+  editCourseName: string = '';
+  isModalOpen: boolean = false;
+  isEditModalOpen: boolean = false;
+  isDeleteModalOpen: boolean = false;
+  courseToEditIndex: number | null = null;
+  courseToDeleteIndex: number | null = null;
+  isDeleteSelectedModalOpen = false;
+  isLogoutModalOpen: boolean = false;
+  dropdowns: Record<string, boolean> = {
+    quizzes: false,
+    activities: false,
+    exams: false,
+    projects: false
+  };
+
+  loggedInUsername = '';
+  logout: any;
+  quizzes: any[] = [];
+  newQuiz: any = { question: '', score: 0, total: 0 };
+
+  showTotalsTable: boolean = false;
+  totals: any = {
+    quizTotal: 0,
+    activityTotal: 0,
+    examTotal: 0,
+    exerciseTotal: 0,
+    projectTotal: 0,
+    grandTotal: 0
+  };
 
   constructor(
-    private signupService: SignupService,
     private router: Router,
     private studentService: StudentService,
-    private subjectService: SubjectService
+    private subjectService: SubjectService,
+    private snackBar: MatSnackBar,
+    private quizService: QuizService
   ) {}
 
-  profile = {
-    image: '',
-    profilePic: './assets/profile-pic.png',
-    name: '',
-    username: '',
-    email: '',
-    school: '',
-    gender: '',
-    birthday: new Date(1990, 1, 1),
-    age: 30
-  };
-
-  studentData: any;
-  newStudentData: any = {
-    first_name: '',
-    middle_name: '',
-    surname: '',
-    email: '',
-    birthdate: '',
-    gender: '',
-    password: '',
-    university: '',
-    academic_level: '',
-    username: ''
-  };
-
-  getStudent() {
-    this.studentService.getStudent().subscribe({
-      next: data => {
-        this.studentData = data;
-        this.profile = {
-          image: '',
-          profilePic: data.profilePic || './assets/profile-pic.png',
-          name: data.name,
-          username: data.username,
-          email: data.email,
-          school: data.university || 'Unknown University',
-          gender: data.gender,
-          birthday: new Date(data.birthdate),
-          age: this.calculateAge(new Date(data.birthdate))
-        };
-      },
-      error: error => {
-        console.error('Error fetching student data:', error);
-      }
-    });
-  }
-
-  calculateAge(birthday: Date): number {
-    const ageDifMs = Date.now() - birthday.getTime();
-    const ageDate = new Date(ageDifMs);
-    return Math.abs(ageDate.getUTCFullYear() - 1970);
-  }
-
-  createStudent() {
-    this.studentService.createStudent(this.newStudentData).subscribe({
-      next: data => {
-        console.log('Student created:', data);
-        this.getStudent(); // Refresh student data
-      },
-      error: error => {
-        console.error('Error creating student:', error);
-      }
-    });
-  }
-
-  updateStudent() {
-    this.studentService.updateStudent(this.studentData).subscribe({
-      next: data => {
-        console.log('Student updated:', data);
-        this.getStudent(); // Refresh student data
-      },
-      error: error => {
-        console.error('Error updating student:', error);
-      }
-    });
-  }
-
-  deleteStudent() {
-    const studentId = this.studentData.id;
-    this.studentService.deleteStudent(studentId).subscribe({
-      next: data => {
-        console.log('Student deleted:', data);
-        this.studentData = null; // Clear student data
-      },
-      error: error => {
-        console.error('Error deleting student:', error);
-      }
-    });
-  }
-
   ngOnInit(): void {
-    this.getStudent();
     this.loadSubjects();
   }
+
+  loadQuizzes(): void {
+    if (this.selectedSubjectId) {
+      this.quizService.getQuizzes(this.selectedSubjectId).subscribe(data => {
+        this.quizzes = data;
+      });
+    }
+  }
+
+  addQuiz(): void {
+    this.newQuiz.subject_id = this.selectedSubjectId;
+    this.quizService.addQuiz(this.newQuiz).subscribe(data => {
+      this.loadQuizzes();
+    });
+  }
+
+  updateQuiz(quiz: any): void {
+    this.quizService.updateQuiz(quiz.id, quiz).subscribe(data => {
+      this.loadQuizzes();
+    });
+  }
   
-  selectSubMenu(subMenu: string): void {
-    this.selectedSubMenu = subMenu;
+  deleteQuiz(quizId: any): void {
+    this.quizService.deleteQuiz(quizId).subscribe(data => {
+      this.loadQuizzes();
+    });
+  }  
+
+  loadSubjects() {
+    this.subjectService.getSubjects().subscribe(
+      subjects => {
+        this.subjects = subjects;
+      },
+      error => {
+        console.error('Error loading subjects:', error);
+      }
+    );
   }
 
-  selectMenu(menu: string) {
-    this.selectedMenu = menu;
+  loadAssessments() {
+    if (this.selectedSubjectId) {
+      this.subjectService.getSubjectById(this.selectedSubjectId).subscribe(
+        (subject) => {
+          this.assessmentWeights = {
+            activity_weight: subject.activity_weight,
+            quiz_weight: subject.quiz_weight,
+            exercise_weight: subject.exercise_weight,
+            exam_weight: subject.exam_weight,
+            project_weight: subject.project_weight
+          };
+        },
+        (error) => {
+          console.error('Error loading assessments:', error);
+          this.assessmentWeights = null;  // Ensure assessmentWeights is null in case of error
+        }
+      );
+    } else {
+      this.assessmentWeights = null;  // Reset assessmentWeights if no subject is selected
+    }
   }
 
-  subjects: Subject[] = [];
-  selectedSubjects: boolean[] = [];
-
-  selectMode = false;
-
+  saveAssessmentWeights() {
+    if (this.selectedSubjectId && this.assessmentWeights) {
+      const totalWeight = this.assessmentWeights.activity_weight +
+                          this.assessmentWeights.quiz_weight +
+                          this.assessmentWeights.exercise_weight +
+                          this.assessmentWeights.exam_weight +
+                          this.assessmentWeights.project_weight;
+  
+      if (totalWeight > 100) {
+        this.snackBar.open('Total weight of all assessments should be less or equal to 100%', 'Close', {
+          duration: 3000,
+        });
+        return; // Stop further execution if validation fails
+      }
+  
+      // Convert percentage weights to decimals
+      const payload = {
+        id: this.selectedSubjectId,
+        activity_weight: this.assessmentWeights.activity_weight / 100,
+        quiz_weight: this.assessmentWeights.quiz_weight / 100,
+        exercise_weight: this.assessmentWeights.exercise_weight / 100,
+        exam_weight: this.assessmentWeights.exam_weight / 100,
+        project_weight: this.assessmentWeights.project_weight / 100,
+      };
+  
+      // Call the updateSubject method from SubjectService
+      this.subjectService.updateSubject(this.selectedSubjectId, payload).subscribe(
+        (response) => {
+          // Handle success
+          console.log('Assessment weights updated successfully:', response);
+          this.snackBar.open('Assessment weights updated successfully', 'Close', {
+            duration: 3000,
+          });
+        },
+        (error) => {
+          // Handle error
+          console.error('Error updating assessment weights:', error);
+          this.snackBar.open('Failed to update assessment weights', 'Close', {
+            duration: 3000,
+          });
+        }
+      );
+    }
+  }  
+  
   deleteSelected() {
     for (let i = this.selectedSubjects.length - 1; i >= 0; i--) {
       if (this.selectedSubjects[i]) {
         const subjectId = this.subjects[i].id;
         this.subjectService.deleteSubject(subjectId).subscribe(
           () => {
-            console.log('Subject deleted successfully.');
-            this.subjects.splice(i, 1);
-            this.selectedSubjects.splice(i, 1);
+            this.snackBar.open('Subject deleted successfully', 'Close', { duration: 3000 });
+            this.loadSubjects(); // Reload subjects after deletion
           },
           error => {
             console.error('Error deleting subject:', error);
+            this.snackBar.open('Something went wrong. Please try again later.', 'Close', { duration: 3000 });
           }
         );
       }
     }
-    this.resetSelection();
+    this.selectedSubjects = []; // Clear selection after deletion
+  }
+  
+
+  addSubject() {
+    this.subjectData.subject_name = this.newSubjectName;
+    this.subjectService.addSubject(this.subjectData).subscribe(
+      response => {
+        this.snackBar.open('Subject added successfully', 'Close', { duration: 3000 });
+        this.loadSubjects();
+        this.closeAddModal();
+      },
+      error => {
+        console.error('Error adding subject:', error);
+        this.snackBar.open('Subject already exists.', 'Close', { duration: 3000 });
+      }
+    );
   }
 
-  addRow() {
-    this.subjects.push({ id: 0, subject_name: 'New Subject' }); // Default value for new subjects
-    this.selectedSubjects.push(false);
-  }
-
-  addSubject(subjectName: string) {
-    if (subjectName.trim() !== '') {
-      const newSubject: Subject = { id: 0, subject_name: subjectName };
-      this.subjectService.createSubject(newSubject).subscribe(
-        createdSubject => {
-          console.log('Subject created:', createdSubject);
-          this.subjects.push(createdSubject);
-          this.selectedSubjects.push(false);
+  saveEditedSubject() {
+    if (this.selectedSubject && this.selectedSubject.subject_name.trim()) {
+      // Check if the subject name already exists
+      const existingSubject = this.subjects.find(subject => subject.subject_name.toLowerCase() === this.selectedSubject.subject_name.toLowerCase());
+      if (existingSubject && existingSubject.id !== this.selectedSubject.id) {
+        this.snackBar.open('Subject name already exists. Please choose a different name.', 'Close', { duration: 3000 });
+        return;
+      }
+  
+      const totalWeight = this.selectedSubject.quiz_weight +
+                          this.selectedSubject.activity_weight +
+                          this.selectedSubject.exam_weight +
+                          this.selectedSubject.project_weight +
+                          this.selectedSubject.exercise_weight;
+      if (totalWeight > 100) {
+        this.snackBar.open('Total weight of all assessments should be less or equal to 100', 'Close', { duration: 3000 });
+        return;
+      }
+  
+      const updatedSubject = {
+        id: this.selectedSubject.id,
+        subject_name: this.selectedSubject.subject_name,
+        quiz_weight: this.selectedSubject.quiz_weight,
+        activity_weight: this.selectedSubject.activity_weight,
+        exam_weight: this.selectedSubject.exam_weight,
+        project_weight: this.selectedSubject.project_weight,
+        exercise_weight: this.selectedSubject.exercise_weight,
+      };
+      this.subjectService.updateSubject(this.selectedSubject.id, updatedSubject).subscribe(
+        response => {
+          this.snackBar.open('Subject updated successfully', 'Close', { duration: 3000 });
+          this.loadSubjects();
+          this.closeEditModal();
         },
         error => {
-          console.error('Error creating subject:', error);
-          // Handle error, e.g., show error message
+          console.error('Error updating subject:', error);
+          this.snackBar.open('Something went wrong. Please try again later', 'Close', { duration: 3000 });
         }
       );
-    } else {
-      console.error('Subject name is required');
-      // Handle empty subject name, e.g., show error message
     }
   }
+  
 
-  loadSubjects() {
-    this.subjectService.getSubjects().subscribe({
-      next: (response) => {
-        this.subjects = response;
-      },
-      error: (error) => {
-        console.error('Error fetching subjects:', error);
-        // Handle error, e.g., show error message
-      }
-    });
+  //Courses
+  openEditModalSubject(subject: Subject) {
+    this.selectedSubject = { ...subject };
+    this.showEditModal = true;
   }
 
-  createSubject(subjectData: Subject) {
-    this.subjectService.createSubject(subjectData).subscribe(
-      createdSubject => {
-        console.log('Subject created:', createdSubject);
-        this.loadSubjects(); // Refresh subjects after creation
-      },
-      error => {
-        console.error('Error creating subject:', error);
-        // Handle error, e.g., show error message
-      }
-    );
+  openAddModal() {
+    this.newSubjectName = '';
+    this.showAddModal = true;
   }
 
-  updateSubject(subjectData: Subject) {
-    const id = subjectData.id;
-    this.subjectService.updateSubject(id, subjectData).subscribe(
-      updatedSubject => {
-        console.log('Subject updated:', updatedSubject);
-        this.loadSubjects(); // Refresh subjects after update
-      },
-      error => {
-        console.error('Error updating subject:', error);
-        // Handle error, e.g., show error message
-      }
-    );
-  }
-
-  deleteSubject(id: number) {
-    this.subjectService.deleteSubject(id).subscribe(
-      () => {
-        console.log('Subject deleted successfully.');
-        this.subjects = this.subjects.filter(subject => subject.id !== id); // Remove from local array
-      },
-      error => {
-        console.error('Error deleting subject:', error);
-        // Handle error, e.g., show error message
-      }
-    );
+  closeAddModal() {
+    this.showAddModal = false;
   }
 
   toggleSelection() {
     this.selectMode = !this.selectMode;
-    if (!this.selectMode) {
-      this.resetSelection();
-    }
   }
 
-  resetSelection() {
-    this.selectedSubjects = new Array(this.subjects.length).fill(false);
+  toggleAllSelection(event: any) {
+    const checked = event.target.checked; // Safely access checked property
+    this.selectedSubjects.fill(checked);
+  }
+  
+  selectSubMenu(subMenu: string): void {
+    this.selectedSubMenu = subMenu;
   }
 
-  removeSubject(index: number) {
-    const subjectId = this.subjects[index].id;
-    this.subjectService.deleteSubject(subjectId).subscribe(
-      () => {
-        console.log('Subject deleted successfully.');
-        this.subjects.splice(index, 1);
-        this.selectedSubjects.splice(index, 1);
-      },
-      error => {
-        console.error('Error deleting subject:', error);
-        // Handle error, e.g., show error message
-      }
-    );
+  toggleDropdown(menu: string): void {
+    this.dropdowns[menu] = !this.dropdowns[menu];
   }
 
-  logout() {
-    // Clear any stored session/token information
-    localStorage.removeItem('token'); // Assuming you store token in localStorage
-    // You can also clear any other session-related data here if needed
+  openModal(): void {
+    this.isModalOpen = true;
+  }
 
-    // Navigate to login page
-    this.router.navigate(['/login']); // Adjust '/login' to your actual login page route
+  closeModal(): void {
+    this.isModalOpen = false;
+  }
+
+  openEditModal(subject: Subject) {
+    this.selectedSubject = { ...subject };
+    this.showEditModal = true;
+  }
+
+  closeEditModal() {
+    this.showEditModal = false;
+  }
+
+  trackByFn(index: number): number {
+    return index;
+  }
+
+  selectMenu(menu: string) {
+    this.selectedMenu = menu;
   }
 }

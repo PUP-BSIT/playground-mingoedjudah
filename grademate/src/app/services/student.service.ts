@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 @Injectable()
 export class StudentService {
-  private apiUrl = 'http://localhost/php-project/student.php';
+  private apiUrl = 'http://localhost/api/student.php';
   //private apiUrl = 'https://grademate.tech/api/student.php';
 
   constructor(private http: HttpClient) {}

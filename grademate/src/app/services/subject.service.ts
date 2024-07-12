@@ -1,49 +1,90 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 
-@Injectable({
-  providedIn: 'root'
-})
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+
+@Injectable()
 export class SubjectService {
-  private apiUrl = 'http://localhost/php-project/subject.php';
+  private baseUrl = 'http://localhost/api/subject.php';
 
-  constructor(private http: HttpClient) {}
-
-  private getHeaders() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('No token found');
-    }
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
-  }
+  constructor(private http: HttpClient) { }
 
   getSubjects(): Observable<any> {
-    const headers = this.getHeaders();
-    return this.http.get<any>(this.apiUrl, { headers }).pipe(catchError(this.handleError));
+    return this.http.get(this.baseUrl, { withCredentials: true })
+      .pipe(
+        catchError((error: any) => {
+          console.error('Error fetching subjects:', error);
+          return throwError(error);
+        })
+      );
   }
 
-  createSubject(subject: any): Observable<any> {
-    const headers = this.getHeaders();
-    return this.http.post<any>(this.apiUrl, subject, { headers }).pipe(catchError(this.handleError));
+  getSubjectById(id: number): Observable<any> {
+    const url = `${this.baseUrl}?id=${id}`;
+    return this.http.get(url, { withCredentials: true }).pipe(
+      map((subject: any) => {
+        // Convert decimal weights to percentages
+        subject.activity_weight = subject.activity_weight * 100;
+        subject.quiz_weight = subject.quiz_weight * 100;
+        subject.exercise_weight = subject.exercise_weight * 100;
+        subject.exam_weight = subject.exam_weight * 100;
+        subject.project_weight = subject.project_weight * 100;
+        return subject;
+      }),
+      catchError((error: any) => {
+        console.error('Error fetching subject:', error);
+        return throwError(error);
+      })
+    );
+  }
+  
+
+  addSubject(subjectData: any): Observable<any> {
+    return this.http.post<any>(this.baseUrl, subjectData, { withCredentials: true })
+      .pipe(
+        catchError(this.handleError)
+      );
   }
 
-  updateSubject(id: number, subject: any): Observable<any> {
-    const headers = this.getHeaders();
-    return this.http.put<any>(`${this.apiUrl}?id=${id}`, subject, { headers }).pipe(catchError(this.handleError));
-  }
+  updateSubject(subjectId: number, payload: any): Observable<any> {
+    const url = `${this.baseUrl}?id=${subjectId}`;
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+  
+    return this.http.put(url, payload, { headers, withCredentials: true }).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error updating subject:', error);
+        return throwError(error);
+      })
+    );
+  }  
 
   deleteSubject(id: number): Observable<any> {
-    const headers = this.getHeaders();
-    return this.http.delete<any>(`${this.apiUrl}?id=${id}`, { headers }).pipe(catchError(this.handleError));
+    const url = `${this.baseUrl}`;
+    const body = { id };
+    return this.http.request('delete', url, { body, withCredentials: true })
+      .pipe(
+        catchError((error: any) => {
+          console.error('Error deleting subject:', error);
+          return throwError(error);
+        })
+      );
   }
 
   private handleError(error: HttpErrorResponse) {
-    console.error('API Error: ', error);
-    return throwError(error);
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      console.error('An error occurred:', error.error.message);
+    } else {
+      // Server-side error
+      console.error(
+        `Backend returned code ${error.status}, ` +
+        `body was: ${error.error}`
+      );
+    }
+    // Return an observable with a user-facing error message
+    return throwError('Something bad happened; please try again later.');
   }
 }
