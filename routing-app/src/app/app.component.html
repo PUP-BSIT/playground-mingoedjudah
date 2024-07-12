@@ -1,0 +1,29 @@
+This is the root component.
+<button routerLink="/">Go to Root</button>
+<button routerLink="/first">Go to First</button>
+<button [routerLink]="['/second/, 3']">Go to Second</button>
+<router-outlet/>
+
+<!-- 
+<button (click)="navigateToRoot">
+  Go To Root
+</button>
+-->
+
+<button [routerLink]="['/second/', 3]">
+  Go to second with 3
+</button>
+
+<button [routerLink]="['/second/', 4]">
+  Go to second with 4
+</button>
+<router-outlet/>
+
+<button routerLink="/first"
+  [queryParams]="{ order: 'asc', page: 1 }">
+  Go to First with Query Params
+</button>
+
+<button (click)="onButton1Click()">
+  Go to the First with Query Params using Component
+</button>

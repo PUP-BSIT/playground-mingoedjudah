@@ -1,0 +1,21 @@
+<div class="grade-entry-content">
+    <div>
+      <mat-form-field appearance="fill">
+        <mat-label>Subjects</mat-label>
+        <mat-select [(value)]="selectedSubject" (selectionChange)="onSubjectChange($event)">
+          <mat-option *ngFor="let subject of subjects" [value]="subject.id">{{ subject.subject_name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Select Assessment Type</mat-label>
+        <mat-select [(value)]="selectedTable" (selectionChange)="onTableChange($event)">
+          <mat-option *ngFor="let assessment of assessmentTypes" [value]="assessment.value">{{ assessment.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  
+    <div *ngIf="selectedTable === 'activity'">
+      <app-activity [subjectId]="selectedSubject"></app-activity>
+    </div>
+  </div>
+  
