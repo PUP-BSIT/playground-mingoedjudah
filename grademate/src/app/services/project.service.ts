@@ -1,28 +1,48 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class ProjectService {
-  private apiUrl = 'http://localhost/api/subject_project.php';
+  private apiUrl = 'http://localhost/api'; // Base API URL
 
   constructor(private http: HttpClient) { }
 
-  getProject(subjectId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}?subject_id=${subjectId}`, { withCredentials: true });
+  getProjects(subjectId: number): Observable<any[]> {
+    const url = `${this.apiUrl}/subject_project.php?subject_id=${subjectId}`;
+    return this.http.get<any[]>(url, { withCredentials: true }).pipe(
+      catchError(this.handleError)
+    );
   }
 
   addProject(projectData: any): Observable<any> {
-    return this.http.post(this.apiUrl, projectData, { withCredentials: true });
+    const url = `${this.apiUrl}/subject_project.php`;
+    return this.http.post<any>(url, projectData, { withCredentials: true }).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  updateProject(id: number, projectData: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}?id=${id}`, projectData, { withCredentials: true });
+  updateProject(projectId: number, projectData: any): Observable<any> {
+    const url = `${this.apiUrl}/subject_project.php?id=${projectId}`;
+    return this.http.put<any>(url, projectData, { withCredentials: true }).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  deleteProject(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}?id=${id}`, { withCredentials: true });
+  deleteProject(projectData: any): Observable<any> {
+    const url = `${this.apiUrl}/subject_project.php`;
+    return this.http.request('delete', url, { 
+      body: projectData, 
+      withCredentials: true,
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }) // Ensure the correct content type
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  private handleError(error: any) {
+    console.error('An error occurred:', error);
+    return throwError('Something bad happened; please try again later.');
   }
 }

@@ -1,5 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { SubjectService } from '../../services/subject.service';
+import { ActivityComponent } from '../activity/activity.component';
+import { ExerciseComponent } from '../exercise/exercise.component';
+import { QuizComponent } from '../quiz/quiz.component';
+import { ExamComponent } from '../exam/exam.component';
+import { ProjectComponent } from '../project/project.component';
 
 @Component({
   selector: 'app-grade-entry',
@@ -9,7 +14,7 @@ import { SubjectService } from '../../services/subject.service';
 export class GradeEntryComponent implements OnInit {
   subjects: any[] = [];
   selectedSubject!: number;
-  selectedTable: string = 'activity'; // Default to 'activity'
+  selectedTable: string = '';
   assessmentTypes = [
     { value: 'activity', label: 'Activity' },
     { value: 'exercise', label: 'Exercise' },
@@ -17,6 +22,12 @@ export class GradeEntryComponent implements OnInit {
     { value: 'exam', label: 'Exam' },
     { value: 'project', label: 'Project' }
   ];
+
+  @ViewChild(ActivityComponent) activityComponent!: ActivityComponent;
+  @ViewChild(ExerciseComponent) exerciseComponent!: ExerciseComponent;
+  @ViewChild(QuizComponent) quizComponent!: QuizComponent;
+  @ViewChild(ExamComponent) examComponent!: ExamComponent;
+  @ViewChild(ProjectComponent) projectComponent!: ProjectComponent;
 
   constructor(private subjectService: SubjectService) {}
 
@@ -49,12 +60,32 @@ export class GradeEntryComponent implements OnInit {
   }
 
   reloadActivities(): void {
-    if (this.selectedTable === 'activity') {
-      // Trigger reloading of activities
-      const activityComponent = document.querySelector('app-activity') as any;
-      if (activityComponent) {
-        activityComponent.loadActivities(this.selectedSubject);
-      }
+    switch (this.selectedTable) {
+      case 'activity':
+        if (this.activityComponent) {
+          this.activityComponent.loadActivities(this.selectedSubject);
+        }
+        break;
+      case 'exercise':
+        if (this.exerciseComponent) {
+          this.exerciseComponent.loadExercises(this.selectedSubject);
+        }
+        break;
+      case 'quiz':
+        if (this.quizComponent) {
+          this.quizComponent.loadQuizzes(this.selectedSubject);
+        }
+        break;
+      case 'exam':
+        if (this.examComponent) {
+          this.examComponent.loadExams(this.selectedSubject);
+        }
+        break;
+      case 'project':
+        if (this.projectComponent) {
+          this.projectComponent.loadProjects(this.selectedSubject);
+        }
+        break;
     }
   }
 }

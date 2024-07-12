@@ -1,38 +1,49 @@
 import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { ActivityService } from '../../services/activity.service';
+import { SubjectService } from '../../services/subject.service'; // Import SubjectService
 
 @Component({
-  selector: 'app-activity',
-  templateUrl: './activity.component.html',
-  styleUrls: ['./activity.component.css']
+    selector: 'app-activity',
+    templateUrl: './activity.component.html',
+    styleUrls: ['./activity.component.css']
 })
 export class ActivityComponent implements OnInit, OnChanges {
-  @Input() subjectId: number | null = null;
-  activities: any[] = [];
-  newActivityScore: number = 0;
-  newActivityTotal: number = 0;
-  showAddActivityModal: boolean = false;
+    @Input() subjectId: number | null = null;
+    activities: any[] = [];
+    newActivityScore: number = 0;
+    newActivityTotal: number = 0;
+    showAddActivityModal: boolean = false;
+    subjectName: string = ''; // Initialize subjectName variable
 
-  constructor(private activityService: ActivityService) {}
+    constructor(private activityService: ActivityService, private subjectService: SubjectService) {}
 
-  ngOnInit(): void {
-    if (this.subjectId) {
-      this.loadActivities(this.subjectId);
+    ngOnInit(): void {
+        if (this.subjectId) {
+            this.loadActivities(this.subjectId);
+            this.loadSubjectName(this.subjectId); // Load subject name on component initialization
+        }
     }
-  }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['subjectId'] && !changes['subjectId'].firstChange) {
-      this.loadActivities(this.subjectId!);
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['subjectId'] && !changes['subjectId'].firstChange) {
+            this.loadActivities(this.subjectId!);
+            this.loadSubjectName(this.subjectId!); // Load subject name on subjectId change
+        }
     }
-  }
 
-  loadActivities(subjectId: number): void {
-    this.activityService.getActivities(subjectId).subscribe(
-      activities => this.activities = activities,
-      error => console.error('Error loading activities:', error)
-    );
-  }
+    loadActivities(subjectId: number): void {
+        this.activityService.getActivities(subjectId).subscribe(
+            activities => this.activities = activities,
+            error => console.error('Error loading activities:', error)
+        );
+    }
+
+    loadSubjectName(subjectId: number): void {
+        this.subjectService.getSubjectById(subjectId).subscribe(
+            subject => this.subjectName = subject.subject_name,
+            error => console.error('Error loading subject name:', error)
+        );
+    }
 
   updateActivity(activity: any): void {
     const activityData = { id: activity.id, subject_id: this.subjectId, score: activity.score, total: activity.total };
